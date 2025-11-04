@@ -28,7 +28,7 @@ type StateStore interface {
 	//
 	// This is called internally in order to decide
 	// wheter a new status message should be posted.
-	LastStatus() (artist, track string)
+	LastStatus() (artist string, track string, err error)
 
 	// Called after successfully posting a new Mastodon status.
 	//
@@ -85,7 +85,11 @@ func (r r) Run() error {
 	if err != nil {
 		return err
 	}
-	if r.shouldUpdate(artist, track) {
+	shouldUpdate, err := r.shouldUpdate(artist, track)
+	if err != nil {
+		return err
+	}
+	if shouldUpdate {
 		if err := r.t.toot(artist, track); err != nil {
 			return err
 		}
@@ -97,7 +101,10 @@ func (r r) Run() error {
 	return nil
 }
 
-func (r r) shouldUpdate(artist, track string) bool {
-	a, t := r.ss.LastStatus()
-	return a != artist || t != track
+func (r r) shouldUpdate(artist, track string) (bool, error) {
+	a, t, err := r.ss.LastStatus()
+	if err != nil {
+		return false, err
+	}
+	return a != artist || t != track, nil
 }

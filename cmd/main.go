@@ -25,19 +25,18 @@ var emojis = []Emoji{BLACK_HEART, HORNS, GUITAR, SKULL, SKULL_AND_BONES, DEVIL}
 type tmpFileStore struct {
 }
 
-func (ts tmpFileStore) LastStatus() (artist, track string) {
+func (ts tmpFileStore) LastStatus() (artist string, track string, err error) {
 	data, err := os.ReadFile(os.TempDir() + "/lastplay.dat")
 	if err != nil {
 		fmt.Printf("Failed to read status file: %s\n", err)
-		return "", ""
+		return "", "", err
 	}
 
 	split := strings.Split(string(data), "\n")
 	if len(split) != 2 {
-		fmt.Printf("Status file has an incorrect number of lines: %d\n", len(split))
-		return "", ""
+		return "", "", fmt.Errorf("status file has an incorrect number of lines: %d", len(split))
 	}
-	return split[0], split[1]
+	return split[0], split[1], nil
 }
 
 func (ts tmpFileStore) Store(artist, track string) error {
