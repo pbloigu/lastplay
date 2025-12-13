@@ -10,19 +10,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type emoji = rune
-
-const (
-	BLACK_HEART     emoji = rune(0x1F5A4)
-	HORNS           emoji = rune(0x1F918)
-	GUITAR          emoji = rune(0x1F3B8)
-	SKULL           emoji = rune(0x1F480)
-	SKULL_AND_BONES emoji = rune(0x2620)
-	DEVIL           emoji = rune(0x1F608)
-)
-
-var emojis = []emoji{BLACK_HEART, HORNS, GUITAR, SKULL, SKULL_AND_BONES, DEVIL}
-
 type tooter struct {
 	mUrl   string
 	mToken string
@@ -40,13 +27,6 @@ func (t tooter) toot(artist, track string) error {
 	}
 	return nil
 }
-
-// func (t t) createToot(artist, track string) string {
-// 	fn := func() emoji {
-// 		return emojis[rand.Intn(len(emojis))]
-// 	}
-// 	return fmt.Sprintf("%c %s ~~ %s %c", fn(), artist, track, fn())
-// }
 
 func (t tooter) createRequest(toot string) (http.Request, error) {
 
@@ -78,7 +58,7 @@ func (t tooter) doToot(r http.Request) error {
 
 	if resp.StatusCode != 200 {
 		log.Error().Int("status", resp.StatusCode).Msg("Mastodon responded with a failude code.")
-		return fmt.Errorf("Mastodon response code: %d", resp.StatusCode)
+		return fmt.Errorf("mastodon response code: %d", resp.StatusCode)
 	}
 	return nil
 }
