@@ -41,7 +41,7 @@ func (ts tmpFileStore) LastStatus() (artist string, track string, err error) {
 
 func (ts tmpFileStore) Store(artist, track string) error {
 	d1 := []byte(fmt.Sprintf("%s\n%s", artist, track))
-	if err := os.WriteFile("/tmp/lastplay.dat", d1, 0644); err != nil {
+	if err := os.WriteFile(os.TempDir()+"/lastplay.dat", d1, 0644); err != nil {
 		return err
 	}
 	return nil
@@ -72,7 +72,7 @@ func configure() lastplay.Config {
 func getEnvOrDie(key string) string {
 	env := os.Getenv(key)
 	if env == "" {
-		panic(fmt.Errorf("Missing environment variable: %s", key))
+		panic(fmt.Errorf("missing environment variable: %s", key))
 	}
 	return env
 }
