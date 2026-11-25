@@ -8,27 +8,26 @@ Ever since having found out Deezer effectively has no API (they have, they just 
 
 This little piece of software tries to fulfill that need. It does it by performing 3 steps in succession:
 
-1. Fetch the last played track from Last.fm
-2. See if it differs from the one fetched on the previous run
+1. Fetch the last played track from ListenBrainz. It used to fetch this info from Last.fm, but in December 2026 Last.Fm dropped free API access.
+2. See if it differs from the one fetched on the previous run.
 3. If it does, post a toot and make note of the track for the next run.
 
 This can then be set to run perodically e.g. with cron or systemd timers on *nix systems.
 
-It's obvious the updates are not real time because first of all it dependes on the interval of consecutive executions and secondly because LastFm status does not update in real time. Therefore instead of "now playing" this is more like "last played", hence the name of the app. This however is as close to "now playing" as it gets with the integration options currently available.
+It's obvious the updates are not real time because it dependes on the interval of consecutive executions. Therefore instead of "now playing" this is more like "last played", hence the name of the app. This however is as close to "now playing" as it gets with the integration options currently available with Deezer.
 
 ## Usage
 Configure the following environment variables:
 
 |Variable|Value|
 |-|-|
-|LP_LFM_USER|Your Last.fm username|
-|LP_LFM_KEY|Your Last.fm API key|
-|LP_LFM_SECRET|Your Last.fm API secret|
+|LP_LB_USER|Your ListenBrainz username|
+|LP_LB_USER_AGENT|User-Agent header to use when calling ListenBrainz API. They have [specific requirements](https://listenbrainz.readthedocs.io/en/latest/users/api/index.html#id5).|
 |LP_MASTODON_URL|Url of your Mastodon instance|
 |LP_MASTODON_TOKEN|Your Mastodon API token|
 
 ### Where / how to acquire these details?
-To obtain Last.fm API key & secret you need to register an application by going here: https://www.last.fm/api/account/create Obviously you need to be logged in to Last.fm. Please use the API responsibly and make sure to read any TOS associated with using the API. It's your problem if you get banned.
+First of all, please use the ListenBrainz API responsibly and make sure to read any TOS associated with using the API and also familiarize yourself with their [rate limits](https://listenbrainz.readthedocs.io/en/latest/users/api/index.html#id1). It's your problem if you get banned.
 
 As for the Mastodon API token: you need to log in to your instance, go to Prefereces (in the default Mastodon web UI), select Development and then New application. Give your application a name and access to scope "write:statuses" in order for this bot backend to be able to post toots.
 

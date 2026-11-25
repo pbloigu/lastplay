@@ -2,12 +2,10 @@ package lastplay
 
 // Overall configuration parameters
 type Config struct {
-	// LastFm username
-	LastFmUser string
-	// LastFm API key
-	LastFmKey string
-	// LastFm API secret
-	LastFmSecret string
+	// ListenBrainz username whose data to access
+	ListenBrainzUser string
+	// ListenBrainz User-Agent header. See: https://listenbrainz.readthedocs.io/en/latest/users/api/index.html#id5
+	ListenBrainzUserAgent string
 	// The full url of your Mastodon instance
 	// Trailing slash should be omitted
 	MastodonUrl string
@@ -40,7 +38,7 @@ type StateStore interface {
 type Runner interface {
 	// Runs a one cycle of:
 	//
-	// 1. Fetch the last played artist, track from LastFm API
+	// 1. Fetch the last played artist, track from ListenBrainz API
 	// 2. Fetch the last artist, track from the provided StateStore
 	// 3. See if the two above differ
 	// 4. If they do, post a Mastodon status message formatted by given TootFormatter
@@ -61,9 +59,8 @@ type TootFormatter func(artist, track string) string
 func New(c Config, s StateStore, tf TootFormatter) Runner {
 	return r{
 		f: f{
-			lfUser:    c.LastFmUser,
-			lfmKey:    c.LastFmKey,
-			lfmSecret: c.LastFmSecret,
+			lbUser:      c.ListenBrainzUser,
+			lbUserAgent: c.ListenBrainzUserAgent,
 		},
 		ss: s,
 		t: tooter{
@@ -90,21 +87,21 @@ func (r r) Run() error {
 		return err
 	}
 	if shouldUpdate {
-		if err := r.t.toot(artist, track); err != nil {
+		if err := r.t.toot(*artist, *track); err != nil {
 			return err
 		}
 
-		if err := r.ss.Store(artist, track); err != nil {
+		if err := r.ss.Store(*artist, *track); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (r r) shouldUpdate(artist, track string) (bool, error) {
+func (r r) shouldUpdate(artist, track *string) (bool, error) {
 	a, t, err := r.ss.LastStatus()
 	if err != nil {
 		return false, err
 	}
-	return a != artist || t != track, nil
+	return artist != nil && track != nil && (a != *artist || t != *track), nil
 }

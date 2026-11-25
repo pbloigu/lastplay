@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -26,10 +27,22 @@ type tmpFileStore struct {
 }
 
 func (ts tmpFileStore) LastStatus() (artist string, track string, err error) {
+	fileName := os.TempDir() + "/lastplay.dat"
+	if _, err := os.Stat(fileName); errors.Is(err, os.ErrNotExist) {
+		if _, err := os.Create(fileName); err != nil {
+			fmt.Printf("Failed create status file: %s\n", err)
+			return "", "", err
+		} else {
+			return "", "", nil
+		}
+	}
 	data, err := os.ReadFile(os.TempDir() + "/lastplay.dat")
 	if err != nil {
 		fmt.Printf("Failed to read status file: %s\n", err)
 		return "", "", err
+	}
+	if len(data) == 0 {
+		return "", "", nil
 	}
 
 	split := strings.Split(string(data), "\n")
@@ -61,11 +74,10 @@ func main() {
 
 func configure() lastplay.Config {
 	return lastplay.Config{
-		LastFmUser:          getEnvOrDie("LP_LFM_USER"),
-		LastFmKey:           getEnvOrDie("LP_LFM_KEY"),
-		LastFmSecret:        getEnvOrDie("LP_LFM_SECRET"),
-		MastodonUrl:         getEnvOrDie("LP_MASTODON_URL"),
-		MastodonAccessToken: getEnvOrDie("LP_MASTODON_TOKEN"),
+		ListenBrainzUser:      getEnvOrDie("LP_LB_USER"),
+		ListenBrainzUserAgent: getEnvOrDie("LP_LB_USER_AGENT"),
+		MastodonUrl:           getEnvOrDie("LP_MASTODON_URL"),
+		MastodonAccessToken:   getEnvOrDie("LP_MASTODON_TOKEN"),
 	}
 }
 
